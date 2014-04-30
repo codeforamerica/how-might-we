@@ -1,0 +1,45 @@
+<p id="notice">
+  <%= notice %>
+</p>
+
+<p>
+  <strong>Body:</strong>
+  <%= @idea.body %>
+</p>
+
+<p>
+  Submitted by <%= @idea.user.name %>
+</p>
+
+<p>
+  <strong>School:</strong>
+  <%= @idea.school.name %>
+</p>
+
+<script type="text/javascript">
+  function do_vote(vote) {
+    var vote_url = '<%= vote_school_idea_path(@school, @idea, format: :json) %>?vote=' + vote;
+    var jqxhr = $.post(vote_url,
+      function() { })
+      .done(function(data) {
+        var vote_str = (data > 1) ? " upvotes" : " upvote";
+        $('#votes-count').html(data + vote_str);
+      })
+      .fail(function(data) {
+        alert("Vote bombed!");
+      });
+  }
+
+  $(function() {
+    $('#upvote-idea-btn').on('click', function(e) {
+      e.preventDefault();
+      do_vote('like');
+    });
+  });
+</script>
+<div>
+  <span id="votes-count"><%= pluralize(@idea.votes_for.size, 'upvote') %></span>
+</div>
+<button id="upvote-idea-btn" class="btn btn-success">Upvote</button> <br /><br />
+<%= link_to 'Edit', edit_school_idea_path(@school, @idea) %> |
+<%= link_to 'Back', school_ideas_path(@school) %>

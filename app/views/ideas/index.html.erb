@@ -1,0 +1,80 @@
+<h1>Ideas for <%= @school.name %></h1>
+
+<div class="row">
+  <div class="col-md-8">
+    <div class="panel panel-default" style="background-color: #29ABE2; color: white;">
+      <div class="panel-body">
+        HOW MIGHT WE ...<br /><br />
+        <%= form_for([@school, @idea]) do |f| %>
+          <%= f.text_area :body, style: "width: 710px; height: 120px; color: #333; padding: 7px;", placeholder: "Enter an idea here..." %>
+          ... TO IMPROVE <%= @school.name %>
+          <%= f.hidden_field :user_id, value: 1 %>
+          <%= f.hidden_field :school_id, value: @school.id %>
+          <div class="col-md-offset-8" style="padding-left: 70px;">
+            <%= f.submit "SUBMIT MY IDEA", class: "btn btn-success" %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div style="text-align: center;">
+      <h1 style="color: #29ABE2;"><%= @school.ideas.size %></h1>
+      <%= pluralize(@school.ideas.size, 'idea') %> submitted for <%= @school.name %>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+  function do_vote(idea) {
+    var vote_url = 'http://0.0.0.0:3005/schools/<%= @school.id %>/ideas/' + idea + '/vote.json';
+    var jqxhr = $.post(vote_url,
+      function() { })
+      .done(function(data) {
+        var vote_str = (data > 1) ? " LIKES" : " LIKE";
+        var vote_count_txt = '#votes-count-' + idea;
+        $(vote_count_txt).html(data + vote_str);
+      })
+      .fail(function(data) {
+        alert("Vote bombed!");
+      });
+  }
+
+  $(function() {
+    $("button[id^='idea-upvote-btn-']").on('click', function(e) {
+      var which_idea = $(this).attr('id').split('-')[3];
+      do_vote(which_idea);
+    });
+  });
+</script>
+
+<div class="row">
+
+</div>
+<% @ideas.each do |idea| %>
+  <div class="row">
+    <div class="col-md-10">
+      <div class="col-md-8">
+        <p>
+          <%= idea.body %><br /><br />
+          <p style="color: #777;">
+            Submitted by <%= idea.user.name if @idea.user %>
+          </p>
+        </p>
+        <hr />
+      </div>
+      <div class="col-md-2">
+        <p style="text-align: center;">
+          <button class="btn btn-success" style="margin-bottom: 3px;" id="idea-upvote-btn-<%= idea.id %>">
+            LIKE
+          </button><br />
+          <span id="votes-count-<%= idea.id %>" style="color: #777;">
+            <%= pluralize(idea.votes_for.size, "LIKE") %>
+          </span>
+        </p>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<br>
